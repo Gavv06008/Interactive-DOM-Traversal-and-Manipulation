@@ -1,0 +1,177 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DOM Traversal Application</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    header {
+      margin-bottom: 20px;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 10px;
+    }
+    .node {
+      border: 1px solid #333;
+      padding: 10px;
+      margin: 5px;
+      cursor: pointer;
+    }
+    .grandparent {
+      background-color: #fdd;
+    }
+    .parent {
+      background-color: #dfd;
+    }
+    .child {
+      background-color: #ddf;
+    }
+    .highlight {
+      outline: 3px solid orange;
+    }
+    .controls button {
+      margin: 5px;
+      padding: 10px 15px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Student Profile</h2>
+    <p><strong>Complete Name:</strong> Your Name</p>
+    <p><strong>Sex:</strong> Your Sex</p>
+    <p><strong>Address:</strong> Your Address</p>
+    <p><strong>Course, Year, and Section:</strong> BSCS 3A</p>
+    <p><strong>Name of School:</strong> Your University</p>
+    <p><strong>Semester and Academic Year:</strong> 2nd Sem, AY 2024-2025</p>
+    <p><strong>Subject Code and Title:</strong> SIA1 - Systems Integration and Architecture 1</p>
+    <p><strong>Name of Subject Instructor:</strong> Mr. Instructor Name</p>
+  </header>
+
+  <div class="controls">
+    <button onclick="traverseUp()">Traverse Up</button>
+    <button onclick="traverseDown()">Traverse Down</button>
+    <button onclick="traverseNext()">Traverse Next Sibling</button>
+    <button onclick="traversePrev()">Traverse Previous Sibling</button>
+    <button onclick="addChild()">Add Child</button>
+    <button onclick="deleteNode()">Delete Node</button>
+  </div>
+
+  <div id="tree" class="node grandparent">Grandparent
+    <div class="node parent">Parent 1
+      <div class="node child">Child 1</div>
+      <div class="node child">Child 2</div>
+    </div>
+    <div class="node parent">Parent 2
+      <div class="node child">Child 1</div>
+      <div class="node child">Child 2</div>
+    </div>
+  </div>
+
+  <script>
+    let selectedNode = null;
+
+    document.querySelectorAll('.node').forEach(node => {
+      node.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (selectedNode) selectedNode.classList.remove('highlight');
+        selectedNode = this;
+        selectedNode.classList.add('highlight');
+      });
+    });
+
+    function traverseUp() {
+      if (selectedNode && selectedNode.parentElement.closest('.node')) {
+        changeSelection(selectedNode.parentElement.closest('.node'));
+      }
+    }
+
+    function traverseDown() {
+      if (selectedNode) {
+        let child = selectedNode.querySelector('.node');
+        if (child) changeSelection(child);
+      }
+    }
+
+    function traverseNext() {
+      if (selectedNode && selectedNode.nextElementSibling?.classList.contains('node')) {
+        changeSelection(selectedNode.nextElementSibling);
+      }
+    }
+
+    function traversePrev() {
+      if (selectedNode && selectedNode.previousElementSibling?.classList.contains('node')) {
+        changeSelection(selectedNode.previousElementSibling);
+      }
+    }
+
+    function addChild() {
+      if (!selectedNode) return;
+      if (selectedNode.classList.contains('grandparent')) {
+        const parent = document.createElement('div');
+        parent.className = 'node parent';
+        parent.textContent = 'New Parent';
+
+        const child1 = document.createElement('div');
+        child1.className = 'node child';
+        child1.textContent = 'Child 1';
+
+        const child2 = document.createElement('div');
+        child2.className = 'node child';
+        child2.textContent = 'Child 2';
+
+        parent.appendChild(child1);
+        parent.appendChild(child2);
+        selectedNode.appendChild(parent);
+
+      } else if (selectedNode.classList.contains('parent')) {
+        const child = document.createElement('div');
+        child.className = 'node child';
+        child.textContent = 'New Child';
+        selectedNode.appendChild(child);
+
+      } else {
+        alert('Cannot add a child to a child node.');
+      }
+      refreshEventListeners();
+    }
+
+    function deleteNode() {
+      if (!selectedNode) return;
+      if (selectedNode.classList.contains('grandparent')) {
+        alert('Cannot delete the grandparent node.');
+        return;
+      }
+      const toDelete = selectedNode;
+      selectedNode = null;
+      toDelete.remove();
+    }
+
+    function changeSelection(newNode) {
+      if (selectedNode) selectedNode.classList.remove('highlight');
+      selectedNode = newNode;
+      selectedNode.classList.add('highlight');
+    }
+
+    function refreshEventListeners() {
+      document.querySelectorAll('.node').forEach(node => {
+        node.removeEventListener('click', handleClick);
+        node.addEventListener('click', handleClick);
+      });
+    }
+
+    function handleClick(e) {
+      e.stopPropagation();
+      if (selectedNode) selectedNode.classList.remove('highlight');
+      selectedNode = this;
+      selectedNode.classList.add('highlight');
+    }
+  </script>
+</body>
+</html>
